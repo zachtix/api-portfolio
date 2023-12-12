@@ -3,8 +3,9 @@ const app = express();
 const mysql = require('mysql2');
 const cors = require('cors');
 require('dotenv').config()
-const { ORIGINS, DB_HOST, DB_NAME, DB_USER, DB_PASS, API_PORT } = process.env;
+const { ORIGINS, DB_HOST, DB_NAME, DB_USER, DB_PASS, API_PORT, PWD_SECRET } = process.env;
 const TokenManager = require('./tokenManager')
+const sha256 = require('sha256');
 
 const corsOptions = {
   origin: ORIGINS.split(','),
@@ -14,10 +15,10 @@ const corsOptions = {
 app.use(cors());
 app.use(express.json());
 const connection = mysql.createConnection({
-  host: '45.91.133.158',
-  user: 'root',
-  password: 'zachtix186',
-  database: 'portfolio'
+  host: DB_HOST,
+  user: DB_USER,
+  password: DB_PASS,
+  database: DB_NAME
 });
 
 app.get('/getprojects', cors(corsOptions), (req, res) => {
@@ -33,58 +34,77 @@ app.get('/getprojects', cors(corsOptions), (req, res) => {
   );
 });
 app.post('/addproject', cors(corsOptions), (req, res) => {
-  const { title, description, tag, stacks, typeContent, liveSite, repo, ThumbnailUrl, thumbnailDes, contents, onShow, showHome } = req.body
-  connection.query(
-    `INSERT INTO portfolios(title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onShow, showHome) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`,
-    [title, description, tag, stacks, typeContent, liveSite, repo, ThumbnailUrl, thumbnailDes, contents, onShow, showHome],
-    (err, results, fields)=>{
-      if(err) {
-        console.log(err);
-      } else {
-        res.send(results);
+  let jwtStatus = TokenManager.authAccess(req);
+  if(jwtStatus!=false){
+    const { title, description, tag, stacks, typeContent, liveSite, repo, ThumbnailUrl, thumbnailDes, contents, onShow, showHome } = req.body
+    connection.query(
+      `INSERT INTO portfolios(title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onShow, showHome) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`,
+      [title, description, tag, stacks, typeContent, liveSite, repo, ThumbnailUrl, thumbnailDes, contents, onShow, showHome],
+      (err, results, fields)=>{
+        if(err) {
+          console.log(err);
+        } else {
+          res.send(results);
+        }
       }
-    }
-  )
+    )
+  }else{
+    res.status(401)
+    res.json({msg:'Token invalid'})
+  }
 })
 app.put('/editproject', cors(corsOptions), (req, res) => {
-  const { id, title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onShow, showHome } = req.body
-  connection.query(
-    `UPDATE portfolios SET 
-    title = ?,
-    description = ?,
-    tag = ?,
-    stacks = ?,
-    typeContent = ?,
-    liveSite = ?,
-    repo = ?,
-    thumbnailUrl = ?,
-    thumbnailDes = ?,
-    contents = ?,
-    onShow = ? ,
-    showHome = ? 
-    WHERE id = ?`,
-    [title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onShow, showHome, id],
-    (err, results, fields)=>{
-      if(err) {
-        console.log(err);
-      } else {
-        res.send(results);
+  let jwtStatus = TokenManager.authAccess(req);
+  if(jwtStatus!=false){
+    const { id, title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onShow, showHome } = req.body
+    connection.query(
+      `UPDATE portfolios SET 
+      title = ?,
+      description = ?,
+      tag = ?,
+      stacks = ?,
+      typeContent = ?,
+      liveSite = ?,
+      repo = ?,
+      thumbnailUrl = ?,
+      thumbnailDes = ?,
+      contents = ?,
+      onShow = ? ,
+      showHome = ? 
+      WHERE id = ?`,
+      [title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onShow, showHome, id],
+      (err, results, fields)=>{
+        if(err) {
+          console.log(err);
+        } else {
+          res.send(results);
+        }
       }
-    }
-  )
+    )
+  }else{
+    res.status(401)
+    res.json({msg:'Token invalid'})
+  }
 })
 app.delete('/deleteproject', cors(corsOptions), (req, res) => {
-  connection.query(
-    `DELETE FROM portfolios WHERE id = ?`,
-    [req.body.id],
-    (err, results, fields)=>{
-      if(err) {
-        console.log(err);
-      } else {
-        res.send(results);
+  
+  let jwtStatus = TokenManager.authAccess(req);
+  if(jwtStatus!=false){
+    connection.query(
+      `DELETE FROM portfolios WHERE id = ?`,
+      [req.body.id],
+      (err, results, fields)=>{
+        if(err) {
+          console.log(err);
+        } else {
+          res.send(results);
+        }
       }
-    }
-  )
+    )  
+  }else{
+    res.status(401)
+    res.json({msg:'Token invalid'})
+  }
 })
 
 app.get('/getskills', cors(corsOptions), (req, res) => {
@@ -100,45 +120,63 @@ app.get('/getskills', cors(corsOptions), (req, res) => {
   );
 });
 app.post('/addskill', cors(corsOptions), (req, res) => {
-  const { skill, level, iconUrl, iconName, description, onShow } = req.body
-  connection.query(
-    `INSERT INTO skills(skill, level, iconUrl, iconName, description, onShow) VALUES(?,?,?,?,?,?)`,
-    [skill, level, iconUrl, iconName, description, onShow],
-    function(err, results, fields) {
-      if(err) {
-        console.log(err);
-      } else {
-        res.send(results);
+  let jwtStatus = TokenManager.authAccess(req);
+  if(jwtStatus!=false){
+    const { skill, level, iconUrl, iconName, description, onShow } = req.body
+    connection.query(
+      `INSERT INTO skills(skill, level, iconUrl, iconName, description, onShow) VALUES(?,?,?,?,?,?)`,
+      [skill, level, iconUrl, iconName, description, onShow],
+      function(err, results, fields) {
+        if(err) {
+          console.log(err);
+        } else {
+          res.send(results);
+        }
       }
-    }
-  );
+    );  
+  }else{
+    res.status(401)
+    res.json({msg:'Token invalid'})
+  }
 });
 app.put('/editskill', cors(corsOptions), (req, res) => {
-  const { id, skill, level, iconUrl, iconName, description, onShow } = req.body
-  connection.query(
-    `UPDATE skills SET skill = ?, level = ?, iconUrl = ?, iconName = ?, description = ?, onShow = ? WHERE id = ?`,
-    [skill, level, iconUrl, iconName, description, onShow, id],
-    function(err, results, fields) {
-      if(err) {
-        console.log(err);
-      } else {
-        res.send(results);
+  let jwtStatus = TokenManager.authAccess(req);
+  if(jwtStatus!=false){
+    const { id, skill, level, iconUrl, iconName, description, onShow } = req.body
+    connection.query(
+      `UPDATE skills SET skill = ?, level = ?, iconUrl = ?, iconName = ?, description = ?, onShow = ? WHERE id = ?`,
+      [skill, level, iconUrl, iconName, description, onShow, id],
+      function(err, results, fields) {
+        if(err) {
+          console.log(err);
+        } else {
+          res.send(results);
+        }
       }
-    }
-  );
+    );  
+  }else{
+    res.status(401)
+    res.json({msg:'Token invalid'})
+  }
 });
 app.delete('/deleteskill', cors(corsOptions), (req, res) => {
-  connection.query(
-    `DELETE FROM skills WHERE id = ?`,
-    [req.body.id],
-    function(err, results, fields) {
-      if(err) {
-        console.log(err);
-      } else {
-        res.send(results);
+  let jwtStatus = TokenManager.authAccess(req);
+  if(jwtStatus!=false){
+    connection.query(
+      `DELETE FROM skills WHERE id = ?`,
+      [req.body.id],
+      function(err, results, fields) {
+        if(err) {
+          console.log(err);
+        } else {
+          res.send(results);
+        }
       }
-    }
-  );
+    );  
+  }else{
+    res.status(401)
+    res.json({msg:'Token invalid'})
+  }
 });
 
 app.get('/getpersonaldata', cors(corsOptions), (req, res) => {
@@ -154,38 +192,49 @@ app.get('/getpersonaldata', cors(corsOptions), (req, res) => {
   );
 });
 app.put('/editpersonaldata', cors(corsOptions), (req, res) => {
-  const { id, name, birthday, age, location, phone, email, motto, personalRecord, personalImage, contactImage } = req.body
-  connection.query(
-    `UPDATE personal SET name=?, birthdat=?, age=?, location=?, phone=?, email=?, motto=?, personalRecord=?, personalImage=?, contactImage=? WHERE id=?`,
-    [name, birthday, age, location, phone, email, motto, personalRecord, personalImage, contactImage, id],
-    function(err, results, fields) {
-      if(err) {
-        console.log(err);
-      } else {
-        res.send(results);
+  let jwtStatus = TokenManager.authAccess(req);
+  if(jwtStatus!=false){
+    const { id, name, birthday, age, location, phone, email, motto, personalRecord, personalImage, contactImage } = req.body
+    connection.query(
+      `UPDATE personal SET name=?, birthday=?, age=?, location=?, phone=?, email=?, motto=?, personalRecord=?, prosonalImage=?, contactImage=? WHERE id=1`,
+      [name, birthday, age, location, phone, email, motto, personalRecord, personalImage, contactImage],
+      function(err, results, fields) {
+        if(err) {
+          console.log(err);
+        } else {
+          res.send(results);
+        }
       }
-    }
-  );
+    );  
+  }else{
+    res.status(401)
+    res.json({msg:'Token invalid'})
+  }
 });
 
 app.get('/getlog', cors(corsOptions), (req, res) => {
-  const { count } = req.body
-  // res.send(req.body.count)
-  connection.query(
-    // Count rows
-    // 'SELECT COUNT(*) FROM `log_access` WHERE `time` > date_sub(curdate(), interval ? day)',
-    // [count],
-    // Query lest 7 day
-    `SELECT * FROM log_access WHERE time > date_sub(curdate(), interval ? day)`,
-    [7],//count = 7
-    function(err, results, fields) {
-      if(err) {
-        console.log(err);
-      } else {
-        res.send(results);
+  let jwtStatus = TokenManager.authAccess(req);
+  if(jwtStatus!=false){
+    // const { count } = req.body
+    connection.query(
+      // Count rows
+      // 'SELECT COUNT(*) FROM `log_access` WHERE `time` > date_sub(curdate(), interval ? day)',
+      // [count],
+      // Query lest 7 day
+      `SELECT * FROM log_access WHERE time > date_sub(curdate(), interval ? day)`,
+      [7],//count = 7
+      function(err, results, fields) {
+        if(err) {
+          console.log(err);
+        } else {
+          res.send(results);
+        }
       }
-    }
-  );
+    );
+  }else{
+    res.status(401)
+    res.json({msg:'Token invalid'})
+  }
 });
 
 app.post('/access', cors(corsOptions), (req, res) => {
@@ -203,39 +252,69 @@ app.post('/access', cors(corsOptions), (req, res) => {
   );
 });
 
-// app.post('/get_token/:user_id', (req, res)=>{
-//   res.send(TokenManager.getGenerateAccessToken({'user_id':req.params.user_id}))
-// })
 app.post('/login',(req,res)=>{
-  const {user,pass,expire} = req.body
+  const { user, pass } = req.body
+  const passHash = sha256(pass+PWD_SECRET)
   connection.query(
     `SELECT * FROM users WHERE user=? and pass=?`,
-    [user,pass],
+    [user,passHash],
     (err,result,fields)=> {
       if(err) {
         console.log(err);
       }else{
-        // console.log(result[0].user);
-        // if(result) {
-        //   res.send(TokenManager.getGenerateAccessToken({'user_id':result[0].user},expire))
-        // }else{
-        //   res.send({msg:'Login Failed'})
-        // }
         try{
-          res.send(TokenManager.getGenerateAccessToken({'user_id':result[0].user},expire))
+          // res.send(TokenManager.getGenerateAccessToken({'user_id':result[0].user}))
+          const accToken = TokenManager.getGenerateAccessToken({'user_id':result[0].user})
+          const rfToken = TokenManager.getGenerateRefreshToken({'user_id':result[0].user})
+          res.json({
+            access_token:accToken,
+            refresh_token:rfToken
+          })
         }catch{
-          res.send('Login Fail')
+          res.status(401)
+          res.json({msg:'user or pass invalid'})
         }
       }
     }
   )
 })
+
+app.post('/createuser', cors(corsOptions), (req, res) => {
+  const { user, pass } = req.body
+  const passHash = sha256(pass+PWD_SECRET)
+  connection.query(
+    `INSERT INTO users(user, pass) VALUES(?,?)`,
+    [user, passHash],
+    function(err, results, fields) {
+      if(err) {
+        console.log(err);
+      } else {
+        res.json({msg:'create user success.'})
+      }
+    }
+  );
+});
+
 app.post('/auth',(req,res)=>{
-  let jwtStatus = TokenManager.authentication(req);
+  let jwtStatus = TokenManager.authAccess(req);
   if(jwtStatus!=false){
-    res.send(jwtStatus)
+    res.status(401)
+    res.json({status:'ok'})
+    // res.send(jwtStatus)
   }else{
-    res.send('token err.')
+    res.status(401)
+    res.json({msg:'Token invalid'})
+  }
+})
+app.post('/authrefresh',(req,res)=>{
+  let jwtStatus = TokenManager.authRefresh(req);
+  if(jwtStatus!=false){
+    res.status(401)
+    res.json({status:'ok'})
+    // res.send(jwtStatus)
+  }else{
+    res.status(401)
+    res.json({msg:'Token invalid'})
   }
 })
 

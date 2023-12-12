@@ -2,22 +2,86 @@
 
 ## API End Point
 
-|EndPoint                      |Method|Payload                                                        |Result       |
-|------------------------------|------|---------------------------------------------------------------|-------------|
-|/getprojects                  |GET   |                                                               |Data Projects|
-|**`WIP`**<br>/addproject      |POST  |                                                               |             |
-|**`WIP`**<br>/editproject     |PUT   |                                                               |             |
-|**`WIP`**<br>/deleteproject   |DELETE|                                                               |             |
-|/getskills                    |GET   |                                                               |Data Skills  |
-|**`WIP`**<br>/addskill        |POST  |                                                               |             |
-|**`WIP`**<br>/editskill       |PUT   |                                                               |             |
-|**`WIP`**<br>/deleteskill     |DELETE|                                                               |             |
-|/getpersonaldata              |GET   |                                                               |Data Personal|
-|**`WIP`**<br>/editpersonaldata|PUT   |                                                               |             |
-|**`WIP`**<br>/getlog          |GET   |                                                               |Data Access  |
-|/access                       |POST  |**`json`**<br>{<br>  "ip":"127.0.0.1",<br>  "page":"/test"<br>}|             |
-|**`WIP`**<br>/login           |POST  |                                                               |             |
-|**`WIP`**<br>/auth            |POST  |                                                               |             |
+|EndPoint         |Method|Requirement            |Result       |
+|-----------------|------|-----------------------|-------------|
+|/getprojects     |GET   |                       |Data Projects|
+|/addproject      |POST  |**`Bearer`**+**`json`**|             |
+|/editproject     |PUT   |**`Bearer`**+**`json`**|             |
+|/deleteproject   |DELETE|**`Bearer`**+**`json`**|             |
+|/getskills       |GET   |                       |Data Skills  |
+|/addskill        |POST  |**`Bearer`**+**`json`**|             |
+|/editskill       |PUT   |**`Bearer`**+**`json`**|             |
+|/deleteskill     |DELETE|**`Bearer`**+**`json`**|             |
+|/getpersonaldata |GET   |                       |Data Personal|
+|/editpersonaldata|PUT   |**`Bearer`**+**`json`**|             |
+|/getlog          |GET   |**`Bearer`**           |Data Access  |
+|/access          |POST  |**`json`**             |             |
+|/login           |POST  |**`json`**             |             |
+|/auth            |POST  |**`Bearer`**           |             |
+
+### Json Requirement
+EndPoint /addproject  |  /editproject[Edit Add "id" Primary Key]
+
+    {
+        "title": "demo",
+        "description": "demo",
+        "tag": "demo",
+        "stacks": "demo",
+        "typeContent": "image/video",
+        "liveSite": "https://demo.com",
+        "repo": "https://demo.com",
+        "ThumbnailUrl": "https://demo.com",
+        "thumbnailDes": "demo",
+        "contents": "https://demo.com",
+        "onShow": "true",
+        "showHome": "true"
+    }
+EndPoint /deleteproject["id" Primary Key]
+
+    {
+        "id": "1"
+    }
+EndPoint /addskill  |  /editskill[Edit Add "id" Primary Key]
+
+    {
+        "skill": "demo",
+        "level": "Entry-Level",
+        "iconUrl": "https://demo.com",
+        "iconName": "demo",
+        "description": "demo",
+        "onShow": "true/false"
+    }
+EndPoint /deleteskill["id" Primary Key]
+
+    {
+        "id": "1"
+    }
+EndPoint /editpersonaldata[Edit on "id" 1]
+
+    {
+        "name": "",
+        "birthday": "",
+        "age": "",
+        "location": "",
+        "phone": "",
+        "email": "",
+        "motto": "",
+        "personalRecord": "",
+        "personalImage": "",
+        "contactImage": ""
+    }
+EndPoint /access
+
+    {
+        "ip": "127.0.0.1",
+        "page": "/page"
+    }
+EndPoint /login
+
+    {
+        "user": "demo",
+        "pass": "demo"
+    }
 
 ## Environment
 **`.env`** file
