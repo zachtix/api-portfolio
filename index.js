@@ -5,7 +5,11 @@ const cors = require('cors');
 require('dotenv').config()
 const { ORIGINS, DB_HOST, DB_NAME, DB_USER, DB_PASS, API_PORT, PWD_SECRET } = process.env;
 const TokenManager = require('./tokenManager')
+const TimeLog = require('./timeLog')
 const sha256 = require('sha256');
+
+
+
 
 const corsOptions = {
   origin: ORIGINS.split(','),
@@ -18,15 +22,20 @@ const connection = mysql.createConnection({
   host: DB_HOST,
   user: DB_USER,
   password: DB_PASS,
-  database: DB_NAME
+  database: DB_NAME,
+  // timezone: 'Asia/Bangkok'
+  dateStrings: true,
+  timezone: '+07:00'
 });
 
 app.get('/getprojects', cors(corsOptions), (req, res) => {
+  console.log(TimeLog()+'/getprojects');
   connection.query(
     `SELECT * FROM portfolios`,
     function(err, results, fields) {
       if(err) {
         console.log(err);
+        res.status(500).send("Internal Server Error");
       } else {
         res.send(results);
       }
@@ -34,8 +43,11 @@ app.get('/getprojects', cors(corsOptions), (req, res) => {
   );
 });
 app.post('/addproject', cors(corsOptions), (req, res) => {
+  console.log(TimeLog()+'/addproject');
   let jwtStatus = TokenManager.authAccess(req);
-  if(jwtStatus!=false){
+  if(jwtStatus == 'demo') {
+    res.json({msg:'user demo isn\'t permission'})
+  } else if(jwtStatus!=false){
     const { title, description, tag, stacks, typeContent, liveSite, repo, ThumbnailUrl, thumbnailDes, contents, onShow, showHome } = req.body
     connection.query(
       `INSERT INTO portfolios(title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onShow, showHome) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`,
@@ -43,6 +55,7 @@ app.post('/addproject', cors(corsOptions), (req, res) => {
       (err, results, fields)=>{
         if(err) {
           console.log(err);
+          res.status(500).send("Internal Server Error");
         } else {
           res.send(results);
         }
@@ -54,8 +67,11 @@ app.post('/addproject', cors(corsOptions), (req, res) => {
   }
 })
 app.put('/editproject', cors(corsOptions), (req, res) => {
+  console.log(TimeLog()+'/editproject');
   let jwtStatus = TokenManager.authAccess(req);
-  if(jwtStatus!=false){
+  if(jwtStatus == 'demo') {
+    res.json({msg:'user demo isn\'t permission'})
+  } else if(jwtStatus!=false){
     const { id, title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onShow, showHome } = req.body
     connection.query(
       `UPDATE portfolios SET 
@@ -76,6 +92,7 @@ app.put('/editproject', cors(corsOptions), (req, res) => {
       (err, results, fields)=>{
         if(err) {
           console.log(err);
+          res.status(500).send("Internal Server Error");
         } else {
           res.send(results);
         }
@@ -87,15 +104,18 @@ app.put('/editproject', cors(corsOptions), (req, res) => {
   }
 })
 app.delete('/deleteproject', cors(corsOptions), (req, res) => {
-  
+  console.log(TimeLog()+'/deleteproject');
   let jwtStatus = TokenManager.authAccess(req);
-  if(jwtStatus!=false){
+  if(jwtStatus == 'demo') {
+    res.json({msg:'user demo isn\'t permission'})
+  } else if(jwtStatus!=false){
     connection.query(
       `DELETE FROM portfolios WHERE id = ?`,
       [req.body.id],
       (err, results, fields)=>{
         if(err) {
           console.log(err);
+          res.status(500).send("Internal Server Error");
         } else {
           res.send(results);
         }
@@ -108,11 +128,13 @@ app.delete('/deleteproject', cors(corsOptions), (req, res) => {
 })
 
 app.get('/getskills', cors(corsOptions), (req, res) => {
+  console.log(TimeLog()+'/getskills');
   connection.query(
     `SELECT * FROM skills`,
     function(err, results, fields) {
       if(err) {
         console.log(err);
+        res.status(500).send("Internal Server Error");
       } else {
         res.send(results);
       }
@@ -120,8 +142,11 @@ app.get('/getskills', cors(corsOptions), (req, res) => {
   );
 });
 app.post('/addskill', cors(corsOptions), (req, res) => {
+  console.log(TimeLog()+'/addskill');
   let jwtStatus = TokenManager.authAccess(req);
-  if(jwtStatus!=false){
+  if(jwtStatus == 'demo') {
+    res.json({msg:'user demo isn\'t permission'})
+  } else if(jwtStatus!=false){
     const { skill, level, iconUrl, iconName, description, onShow } = req.body
     connection.query(
       `INSERT INTO skills(skill, level, iconUrl, iconName, description, onShow) VALUES(?,?,?,?,?,?)`,
@@ -129,6 +154,7 @@ app.post('/addskill', cors(corsOptions), (req, res) => {
       function(err, results, fields) {
         if(err) {
           console.log(err);
+          res.status(500).send("Internal Server Error");
         } else {
           res.send(results);
         }
@@ -140,8 +166,11 @@ app.post('/addskill', cors(corsOptions), (req, res) => {
   }
 });
 app.put('/editskill', cors(corsOptions), (req, res) => {
+  console.log(TimeLog()+'/editskill');
   let jwtStatus = TokenManager.authAccess(req);
-  if(jwtStatus!=false){
+  if(jwtStatus == 'demo') {
+    res.json({msg:'user demo isn\'t permission'})
+  } else if(jwtStatus!=false){
     const { id, skill, level, iconUrl, iconName, description, onShow } = req.body
     connection.query(
       `UPDATE skills SET skill = ?, level = ?, iconUrl = ?, iconName = ?, description = ?, onShow = ? WHERE id = ?`,
@@ -149,6 +178,7 @@ app.put('/editskill', cors(corsOptions), (req, res) => {
       function(err, results, fields) {
         if(err) {
           console.log(err);
+          res.status(500).send("Internal Server Error");
         } else {
           res.send(results);
         }
@@ -160,14 +190,18 @@ app.put('/editskill', cors(corsOptions), (req, res) => {
   }
 });
 app.delete('/deleteskill', cors(corsOptions), (req, res) => {
+  console.log(TimeLog()+'/deleteskill');
   let jwtStatus = TokenManager.authAccess(req);
-  if(jwtStatus!=false){
+  if(jwtStatus == 'demo') {
+    res.json({msg:'user demo isn\'t permission'})
+  } else if(jwtStatus!=false){
     connection.query(
       `DELETE FROM skills WHERE id = ?`,
       [req.body.id],
       function(err, results, fields) {
         if(err) {
           console.log(err);
+          res.status(500).send("Internal Server Error");
         } else {
           res.send(results);
         }
@@ -180,11 +214,13 @@ app.delete('/deleteskill', cors(corsOptions), (req, res) => {
 });
 
 app.get('/getpersonaldata', cors(corsOptions), (req, res) => {
+  console.log(TimeLog()+'/getpersonaldata');
   connection.query(
     `SELECT * FROM personal`,
     function(err, results, fields) {
       if(err) {
         console.log(err);
+        res.status(500).send("Internal Server Error");
       } else {
         res.send(results);
       }
@@ -192,8 +228,11 @@ app.get('/getpersonaldata', cors(corsOptions), (req, res) => {
   );
 });
 app.put('/editpersonaldata', cors(corsOptions), (req, res) => {
+  console.log(TimeLog()+'/editpersonaldata');
   let jwtStatus = TokenManager.authAccess(req);
-  if(jwtStatus!=false){
+  if(jwtStatus == 'demo') {
+    res.json({msg:'user demo isn\'t permission'})
+  } else if(jwtStatus!=false){
     const { id, name, birthday, age, location, phone, email, motto, personalRecord, personalImage, contactImage } = req.body
     connection.query(
       `UPDATE personal SET name=?, birthday=?, age=?, location=?, phone=?, email=?, motto=?, personalRecord=?, prosonalImage=?, contactImage=? WHERE id=1`,
@@ -201,20 +240,25 @@ app.put('/editpersonaldata', cors(corsOptions), (req, res) => {
       function(err, results, fields) {
         if(err) {
           console.log(err);
+          res.status(500).send("Internal Server Error");
         } else {
-          res.send(results);
+          // res.send(results);
+          res.send({msg:'Save Personal Data!'})
         }
       }
     );  
   }else{
     res.status(401)
-    res.json({msg:'Token invalid'})
+    res.send({msg:'Token invalid'})
   }
 });
 
 app.get('/getlog', cors(corsOptions), (req, res) => {
+  console.log(TimeLog()+'/getlog');
   let jwtStatus = TokenManager.authAccess(req);
-  if(jwtStatus!=false){
+  if(jwtStatus == 'demo') {
+    res.json({msg:'user demo isn\'t permission'})
+  } else if(jwtStatus!=false){
     // const { count } = req.body
     connection.query(
       // Count rows
@@ -226,18 +270,22 @@ app.get('/getlog', cors(corsOptions), (req, res) => {
       function(err, results, fields) {
         if(err) {
           console.log(err);
+          res.status(500).send("Internal Server Error");
         } else {
           res.send(results);
         }
       }
     );
-  }else{
+  // } else if(jwtStatus == 'demo') {
+  //   res.json({msg:'user demo isn\'t permission'})
+  } else{
     res.status(401)
     res.json({msg:'Token invalid'})
   }
 });
 
 app.post('/access', cors(corsOptions), (req, res) => {
+  console.log(TimeLog()+'/access');
   const { ip, page } = req.body
   connection.query(
     `INSERT INTO log_access(ip, page) VALUES(?,?)`,
@@ -245,6 +293,7 @@ app.post('/access', cors(corsOptions), (req, res) => {
     function(err, results, fields) {
       if(err) {
         console.log(err);
+        res.status(500).send("Internal Server Error");
       } else {
         res.json({msg:'Data collection success.'})
       }
@@ -253,6 +302,7 @@ app.post('/access', cors(corsOptions), (req, res) => {
 });
 
 app.post('/login',(req,res)=>{
+  console.log(TimeLog()+'/login');
   const { user, pass } = req.body
   const passHash = sha256(pass+PWD_SECRET)
   connection.query(
@@ -261,6 +311,7 @@ app.post('/login',(req,res)=>{
     (err,result,fields)=> {
       if(err) {
         console.log(err);
+        res.status(500).send("Internal Server Error");
       }else{
         try{
           // res.send(TokenManager.getGenerateAccessToken({'user_id':result[0].user}))
@@ -268,7 +319,7 @@ app.post('/login',(req,res)=>{
           const rfToken = TokenManager.getGenerateRefreshToken({'user_id':result[0].user})
           res.json({
             access_token:accToken,
-            refresh_token:rfToken
+            // refresh_token:rfToken
           })
         }catch{
           res.status(401)
@@ -280,22 +331,26 @@ app.post('/login',(req,res)=>{
 })
 
 app.post('/createuser', cors(corsOptions), (req, res) => {
-  const { user, pass } = req.body
-  const passHash = sha256(pass+PWD_SECRET)
-  connection.query(
-    `INSERT INTO users(user, pass) VALUES(?,?)`,
-    [user, passHash],
-    function(err, results, fields) {
-      if(err) {
-        console.log(err);
-      } else {
-        res.json({msg:'create user success.'})
-      }
-    }
-  );
+  console.log(TimeLog()+'/createuser');
+  res.json({msg:'close function'})
+  // const { user, pass } = req.body
+  // const passHash = sha256(pass+PWD_SECRET)
+  // connection.query(
+  //   `INSERT INTO users(user, pass) VALUES(?,?)`,
+  //   [user, passHash],
+  //   function(err, results, fields) {
+  //     if(err) {
+  //       console.log(err);
+  //       res.status(500).send("Internal Server Error");
+  //     } else {
+  //       res.json({msg:'create user success.'})
+  //     }
+  //   }
+  // );
 });
 
 app.post('/auth',(req,res)=>{
+  console.log(TimeLog()+'/auth');
   let jwtStatus = TokenManager.authAccess(req);
   if(jwtStatus!=false){
     res.status(401)
@@ -307,6 +362,7 @@ app.post('/auth',(req,res)=>{
   }
 })
 app.post('/authrefresh',(req,res)=>{
+  console.log(TimeLog()+'/authrefresh');
   let jwtStatus = TokenManager.authRefresh(req);
   if(jwtStatus!=false){
     res.status(401)
@@ -319,5 +375,5 @@ app.post('/authrefresh',(req,res)=>{
 })
 
 app.listen(API_PORT, () => {
-  console.log('CORS enable. Server on port '+API_PORT);
+  console.log(TimeLog()+'CORS enable. Server on port '+API_PORT);
 })

@@ -22,8 +22,14 @@ class TokenManager {
     try {
       let accessToken = req.headers.authorization.split(' ')[1];
       let jwtRes = jwt.verify(String(accessToken),ACCESS_SECRET)
-      return jwtRes
+      // return jwtRes
+      if (jwtRes.user_id == 'demo') {
+        return 'demo'
+      } else {
+        return jwtRes
+      }
     }catch(err) {
+      console.log(err);
       return false
     }
   }
