@@ -46,7 +46,8 @@ app.post('/addproject', cors(corsOptions), (req, res) => {
   console.log(TimeLog()+'/addproject');
   let jwtStatus = TokenManager.authAccess(req);
   if(jwtStatus == 'demo') {
-    res.json({msg:'user demo isn\'t permission'})
+    res.status(401)
+    res.send({msg:'user demo isn\'t permission'})
   } else if(jwtStatus!=false){
     const { title, description, tag, stacks, typeContent, liveSite, repo, ThumbnailUrl, thumbnailDes, contents, onShow, showHome } = req.body
     connection.query(
@@ -70,7 +71,8 @@ app.put('/editproject', cors(corsOptions), (req, res) => {
   console.log(TimeLog()+'/editproject');
   let jwtStatus = TokenManager.authAccess(req);
   if(jwtStatus == 'demo') {
-    res.json({msg:'user demo isn\'t permission'})
+    res.status(401)
+    res.send({msg:'user demo isn\'t permission'})
   } else if(jwtStatus!=false){
     const { id, title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onShow, showHome } = req.body
     connection.query(
@@ -107,7 +109,8 @@ app.delete('/deleteproject', cors(corsOptions), (req, res) => {
   console.log(TimeLog()+'/deleteproject');
   let jwtStatus = TokenManager.authAccess(req);
   if(jwtStatus == 'demo') {
-    res.json({msg:'user demo isn\'t permission'})
+    res.status(401)
+    res.send({msg:'user demo isn\'t permission'})
   } else if(jwtStatus!=false){
     connection.query(
       `DELETE FROM portfolios WHERE id = ?`,
@@ -146,7 +149,8 @@ app.post('/addskill', cors(corsOptions), (req, res) => {
   console.log(TimeLog()+'/addskill');
   let jwtStatus = TokenManager.authAccess(req);
   if(jwtStatus == 'demo') {
-    res.json({msg:'user demo isn\'t permission'})
+    res.status(401)
+    res.send({msg:'user demo isn\'t permission'})
   } else if(jwtStatus!=false){
     const { skill, level, iconUrl, iconName, description, onShow } = req.body
     connection.query(
@@ -157,7 +161,7 @@ app.post('/addskill', cors(corsOptions), (req, res) => {
           console.log(err);
           res.status(500).send("Internal Server Error");
         } else {
-          res.send(results);
+          res.send({msg:`add project id ${results.insertId}`});
         }
       }
     );  
@@ -170,7 +174,8 @@ app.put('/editskill', cors(corsOptions), (req, res) => {
   console.log(TimeLog()+'/editskill');
   let jwtStatus = TokenManager.authAccess(req);
   if(jwtStatus == 'demo') {
-    res.json({msg:'user demo isn\'t permission'})
+    res.status(401)
+    res.send({msg:'user demo isn\'t permission'})
   } else if(jwtStatus!=false){
     const { id, skill, level, iconUrl, iconName, description, onShow } = req.body
     connection.query(
@@ -181,7 +186,7 @@ app.put('/editskill', cors(corsOptions), (req, res) => {
           console.log(err);
           res.status(500).send("Internal Server Error");
         } else {
-          res.send(results);
+          res.send({msg:`save skill id ${id}`});
         }
       }
     );  
@@ -194,7 +199,8 @@ app.delete('/deleteskill', cors(corsOptions), (req, res) => {
   console.log(TimeLog()+'/deleteskill');
   let jwtStatus = TokenManager.authAccess(req);
   if(jwtStatus == 'demo') {
-    res.json({msg:'user demo isn\'t permission'})
+    res.status(401)
+    res.send({msg:'user demo isn\'t permission'})
   } else if(jwtStatus!=false){
     connection.query(
       `DELETE FROM skills WHERE id = ?`,
@@ -204,7 +210,8 @@ app.delete('/deleteskill', cors(corsOptions), (req, res) => {
           console.log(err);
           res.status(500).send("Internal Server Error");
         } else {
-          res.send(results);
+          // res.send(results);
+          res.send({msg:`delete project id ${req.body.id}`})
         }
       }
     );  
@@ -232,7 +239,8 @@ app.put('/editpersonaldata', cors(corsOptions), (req, res) => {
   console.log(TimeLog()+'/editpersonaldata');
   let jwtStatus = TokenManager.authAccess(req);
   if(jwtStatus == 'demo') {
-    res.json({msg:'user demo isn\'t permission'})
+    res.status(401)
+    res.send({msg:'user demo isn\'t permission'})
   } else if(jwtStatus!=false){
     const { id, name, birthday, age, location, phone, email, motto, personalRecord, personalImage, contactImage } = req.body
     connection.query(
@@ -258,7 +266,8 @@ app.get('/getlog', cors(corsOptions), (req, res) => {
   console.log(TimeLog()+'/getlog');
   let jwtStatus = TokenManager.authAccess(req);
   if(jwtStatus == 'demo') {
-    res.json({msg:'user demo isn\'t permission'})
+    res.status(401)
+    res.send({msg:'user demo isn\'t permission'})
   } else if(jwtStatus!=false){
     // const { count } = req.body
     connection.query(
@@ -278,7 +287,8 @@ app.get('/getlog', cors(corsOptions), (req, res) => {
       }
     );
   // } else if(jwtStatus == 'demo') {
-  //   res.json({msg:'user demo isn\'t permission'})
+  //     res.status(401)
+  //     res.send({msg:'user demo isn\'t permission'})
   } else{
     res.status(401)
     res.json({msg:'Token invalid'})
