@@ -57,7 +57,7 @@ app.post('/addproject', cors(corsOptions), (req, res) => {
           console.log(err);
           res.status(500).send("Internal Server Error");
         } else {
-          res.send(results);
+          res.send({msg:`add project id ${results.insertId}`});
         }
       }
     )
@@ -94,7 +94,7 @@ app.put('/editproject', cors(corsOptions), (req, res) => {
           console.log(err);
           res.status(500).send("Internal Server Error");
         } else {
-          res.send(results);
+          res.send({msg:`save project id ${id}`});
         }
       }
     )
@@ -117,7 +117,8 @@ app.delete('/deleteproject', cors(corsOptions), (req, res) => {
           console.log(err);
           res.status(500).send("Internal Server Error");
         } else {
-          res.send(results);
+          // res.send(results);
+          res.send({msg:`delete project id ${req.body.id}`})
         }
       }
     )  
@@ -301,7 +302,7 @@ app.post('/access', cors(corsOptions), (req, res) => {
   );
 });
 
-app.post('/login',(req,res)=>{
+app.post('/login', cors(corsOptions),(req,res)=>{
   console.log(TimeLog()+'/login');
   const { user, pass } = req.body
   const passHash = sha256(pass+PWD_SECRET)
