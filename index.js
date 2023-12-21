@@ -8,9 +8,6 @@ const TokenManager = require('./tokenManager')
 const TimeLog = require('./timeLog')
 const sha256 = require('sha256');
 
-
-
-
 const corsOptions = {
   origin: ORIGINS.split(','),
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -41,6 +38,7 @@ app.get('/getprojects', cors(corsOptions), (req, res) => {
       }
     }
   );
+  // connection.close();
 });
 app.post('/addproject', cors(corsOptions), (req, res) => {
   console.log(TimeLog()+'/addproject');
@@ -49,10 +47,10 @@ app.post('/addproject', cors(corsOptions), (req, res) => {
     res.status(401)
     res.send({msg:'user demo isn\'t permission'})
   } else if(jwtStatus!=false){
-    const { title, description, tag, stacks, typeContent, liveSite, repo, ThumbnailUrl, thumbnailDes, contents, onShow, showHome } = req.body
+    const { title, description, tag, stacks, typeContent, liveSite, repo, ThumbnailUrl, thumbnailDes, contents, onTop, onShow, showHome } = req.body
     connection.query(
-      `INSERT INTO portfolios(title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onShow, showHome) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`,
-      [title, description, tag, stacks, typeContent, liveSite, repo, ThumbnailUrl, thumbnailDes, contents, onShow, showHome],
+      `INSERT INTO portfolios(title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onTop, onShow, showHome) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      [title, description, tag, stacks, typeContent, liveSite, repo, ThumbnailUrl, thumbnailDes, contents, onTop, onShow, showHome],
       (err, results, fields)=>{
         if(err) {
           console.log(err);
@@ -74,7 +72,7 @@ app.put('/editproject', cors(corsOptions), (req, res) => {
     res.status(401)
     res.send({msg:'user demo isn\'t permission'})
   } else if(jwtStatus!=false){
-    const { id, title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onShow, showHome } = req.body
+    const { id, title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onTop, onShow, showHome } = req.body
     connection.query(
       `UPDATE portfolios SET 
       title = ?,
@@ -87,10 +85,11 @@ app.put('/editproject', cors(corsOptions), (req, res) => {
       thumbnailUrl = ?,
       thumbnailDes = ?,
       contents = ?,
+      onTop = ? ,
       onShow = ? ,
       showHome = ? 
       WHERE id = ?`,
-      [title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onShow, showHome, id],
+      [title, description, tag, stacks, typeContent, liveSite, repo, thumbnailUrl, thumbnailDes, contents, onTop, onShow, showHome, id],
       (err, results, fields)=>{
         if(err) {
           console.log(err);
@@ -265,10 +264,7 @@ app.put('/editpersonaldata', cors(corsOptions), (req, res) => {
 app.get('/getlog', cors(corsOptions), (req, res) => {
   console.log(TimeLog()+'/getlog');
   let jwtStatus = TokenManager.authAccess(req);
-  if(jwtStatus == 'demo') {
-    res.status(401)
-    res.send({msg:'user demo isn\'t permission'})
-  } else if(jwtStatus!=false){
+  if(jwtStatus!=false){
     // const { count } = req.body
     connection.query(
       // Count rows
@@ -286,9 +282,6 @@ app.get('/getlog', cors(corsOptions), (req, res) => {
         }
       }
     );
-  // } else if(jwtStatus == 'demo') {
-  //     res.status(401)
-  //     res.send({msg:'user demo isn\'t permission'})
   } else{
     res.status(401)
     res.json({msg:'Token invalid'})
@@ -364,12 +357,10 @@ app.post('/auth',(req,res)=>{
   console.log(TimeLog()+'/auth');
   let jwtStatus = TokenManager.authAccess(req);
   if(jwtStatus!=false){
+    res.send({status:'ok'})
+  } else {
     res.status(401)
-    res.json({status:'ok'})
-    // res.send(jwtStatus)
-  }else{
-    res.status(401)
-    res.json({msg:'Token invalid'})
+    res.send({msg:'Token invalid'})
   }
 })
 app.post('/authrefresh',(req,res)=>{
