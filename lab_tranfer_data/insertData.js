@@ -1,10 +1,11 @@
 const mysql = require('mysql2');
+const { DB_HOST, DB_NAME, DB_USER, DB_PASS } = process.env;
 
 const connection = mysql.createConnection({
-  host: '45.91.133.158',
-  user: 'root',
-  password: 'zachtix186',
-  database: 'portfolio'
+  host: DB_HOST,
+  user: DB_USER,
+  password: DB_PASS,
+  database: DB_NAME
 });
 
 // Convert Json Data to Mysql
